@@ -32,9 +32,11 @@ function pullSync(packages, log) {
 
     fs.mkdirSync("storage/pully/pulling");
 
+    let installedCount = 0;
+
     for (let [name, url] of urls) {
         try {
-            if (log) console.info(`Downloading ${name}`);
+            if (log) console.info(`Installing ${name}`);
 
             let res = fetchSync(url);
 
@@ -47,7 +49,6 @@ function pullSync(packages, log) {
             }
 
             let bytes = res.bytes();
-            if (log) console.info(`Installing ${name}`);
             extractSync({ bytes }, `storage/pully/pulling/${name}`);
 
             let packagePath = pully.findPackageSync(
@@ -61,17 +62,26 @@ function pullSync(packages, log) {
             }
 
             fs.renameSync(packagePath, `modules/${name}`);
-
-            if (log) console.info(`Installed ${name}.`);
+            installedCount++;
         } catch (error) {
             console.error(`Failed to install ${name}, expect troubles.`);
             console.error(error);
         }
     }
 
+    if (log)
+        console.info(
+            `${installedCount} package${installedCount > 1 ? "s" : ""} installed.`,
+        );
+
     fs.unlinkSync("storage/pully/pulling");
+}
+
+function pull(packages, log) {
+    return Promise(() => pullSync(packages, log));
 }
 
 module.exports = {
     pullSync,
+    pull,
 };

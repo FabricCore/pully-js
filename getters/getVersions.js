@@ -5,7 +5,7 @@ function versionSync(package) {
     let res = fetchSync(`${repo}/packages/${package}/versions.json`);
 
     if(!res.ok()) {
-        throw new Error(`Returned with status code ${res.statusText()} when fetching ${res.url()}`);
+        throw new Error(`Returned with status code ${res.status()} ${res.statusText()} when fetching ${res.url()}`);
     }
 
     return res.json();

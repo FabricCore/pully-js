@@ -1,6 +1,6 @@
 {
     "name": "pully",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Package manager.",
 
     "keywords": [],
@@ -17,6 +17,7 @@
 
     "dependencies": {
         "rinode": "0.1.0",
-        "extract-zip": "0.1.0"
+        "extract-zip": "0.1.0",
+        "command": "0.1.0"
     }
 }
