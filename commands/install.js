@@ -19,11 +19,12 @@ function install(ctx, numberOfArguments) {
     return 0;
 }
 
-let maxDepth = 5;
+let maxDepth = 256;
 
 function buildInstallCommand(currentDepth = 0) {
     if (currentDepth == 0) {
         return {
+            execute: (ctx) => install(ctx, 0),
             args: {
                 package1: buildInstallCommand(currentDepth + 1),
             },

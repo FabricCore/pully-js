@@ -8,6 +8,11 @@ function getRemotePackageList() {
     else return Object.keys(pully.indexSync());
 }
 
+function getLocalPackageList() {
+    return Object.keys(pully.getLocalManifestsSync());
+}
+
 module.exports = {
     getRemotePackageList,
+    getLocalPackageList,
 };

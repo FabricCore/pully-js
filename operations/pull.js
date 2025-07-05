@@ -45,13 +45,21 @@ function pullSync(packages, log) {
         upToDate,
     );
 
+    Object.assign(
+        manifestsOfPackagesToPull,
+        pully.packageManifestsSync(
+            pully.getOutdatedSync(remoteIndex, localManifests),
+            remoteIndex,
+        ),
+    );
+
     for (let name of Object.keys(manifestsToPull)) {
         if (explicits[name] == undefined && fs.existsSync(`modules/${name}`)) {
             console.warn(
                 `${name} is not installed with pully, please remove package before updating it.`,
             );
             delete manifestsToPull[name];
-        } else if(fs.existsSync(`modules/${name}/.git`)) {
+        } else if (fs.existsSync(`modules/${name}/.git`)) {
             console.warn(
                 `${name} is a Git repository, it will not be updated for protection.`,
             );

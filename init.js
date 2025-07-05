@@ -1,11 +1,13 @@
 let command = require("command");
 
-let { buildInstallCommand } = module.require("./commands");
+let { buildInstallCommand, buildUninstallCommand } =
+    module.require("./commands");
 
 command.register({
     name: "pully",
 
     subcommands: {
         install: buildInstallCommand(),
+        uninstall: buildUninstallCommand(),
     },
 });
