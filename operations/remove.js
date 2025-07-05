@@ -2,34 +2,58 @@ let { getOrphansSync } = module.require("../resolve");
 let fs = require("fs");
 
 function removeSync(packages, log) {
-    let orphans = getOrphansSync();
+    let explicits = require("/storage/pully/explicits.json");
 
     for (let name of packages) {
-        if (orphans[name] == undefined) continue;
-        let remainedDependent = orphans[name].filter(
-            (dep) => !packages.includes(dep),
-        );
-
-        if (remainedDependent.length != 0) {
+        if (explicits[name] == undefined && fs.existsSync(`modules/${name}`)) {
             console.error(
-                `${name} is required by ${remainedDependent.join(", ")}.`,
+                `${name} is not installed with pully, please remove it first`,
+            );
+            console.error("No packages removed.");
+            return;
+        }
+
+        explicits[name] = false;
+    }
+
+    let orphans = getOrphansSync(explicits);
+
+    for (let name of packages) {
+        if ((orphans[name] ?? []).length != 0) {
+            console.error(
+                `${name} is required by ${orphans[name].join(", ")}.`,
             );
             console.error("No packages removed.");
             return;
         }
     }
 
-    let explicits = require("/storage/pully/explicits.json");
     let removeCount = 0;
 
     for (let [name, deps] of Object.entries(orphans)) {
         if (deps.length != 0) continue;
 
+        if (explicits[name] == undefined && fs.existsSync(`modules/${name}`)) {
+            console.error(
+                `${name} is not installed with pully, please remove it first`,
+            );
+            console.error("No packages removed.");
+            return;
+        } else if (fs.existsSync(`modules/${name}/.git`)) {
+            console.error(
+                `${name} is a Git repository, please remove it first.`,
+            );
+            console.error("No packages removed.");
+            return;
+        }
+
         if (log) console.info(`Removing ${name}`);
-        fs.unlinkSync(`modules/${name}`);
         removeCount++;
+        fs.unlinkSync(`modules/${name}`);
         delete explicits[name];
     }
+
+    if (log) console.info(`Removed ${removeCount} packages.`);
 
     if (removeCount != 0) {
         fs.writeFileSync(
@@ -37,8 +61,6 @@ function removeSync(packages, log) {
             JSON.stringify(explicits, null, 2),
         );
     }
-
-    if (log) console.info(`Removed ${removeCount} packages.`);
 }
 
 function remove(packages, log) {

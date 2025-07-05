@@ -33,7 +33,7 @@ function buildUninstallCommand(currentDepth = 1) {
     }
 
     let command = {
-        // suggests: getLocalPackageList,
+        suggests: getLocalPackageList,
         type: StringArgumentType.word(),
         execute: (ctx) => uninstall(ctx, currentDepth - 1),
     };

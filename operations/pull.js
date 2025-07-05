@@ -16,21 +16,20 @@ function pullSync(packages, log) {
     }
 
     let explicitPulls = {};
-    packages = packages.filter((name) => {
+    for (let name of packages) {
         if (explicits[name] == undefined && fs.existsSync(`modules/${name}`)) {
-            console.warn(
-                `${name} is not installed with pully, please remove package before updating it.`,
+            console.error(
+                `${name} is not installed with pully, please remove package first.`,
             );
-            return false;
+            console.error("No packages updated.");
+            return;
         }
 
         explicitPulls[name] = true;
         if (explicits[name] == false) {
             explicits[name] = true;
         }
-
-        return true;
-    });
+    }
 
     let remoteIndex = pully.indexSync();
     let localManifests = pully.getLocalManifestsSync();
@@ -55,15 +54,17 @@ function pullSync(packages, log) {
 
     for (let name of Object.keys(manifestsToPull)) {
         if (explicits[name] == undefined && fs.existsSync(`modules/${name}`)) {
-            console.warn(
+            console.error(
                 `${name} is not installed with pully, please remove package before updating it.`,
             );
-            delete manifestsToPull[name];
+            console.error("No packages updated.");
+            return;
         } else if (fs.existsSync(`modules/${name}/.git`)) {
-            console.warn(
+            console.error(
                 `${name} is a Git repository, it will not be updated for protection.`,
             );
-            delete manifestsToPull[name];
+            console.error("No packages updated.");
+            return;
         }
     }
 
@@ -80,6 +81,8 @@ function pullSync(packages, log) {
 
     let installedCount = 0;
 
+    let renames = [];
+
     for (let [name, url] of urls) {
         try {
             if (log) console.info(`Installing ${name}`);
@@ -90,8 +93,9 @@ function pullSync(packages, log) {
                 console.error(
                     `Download failed for ${name}, returned status code ${res.status()}.`,
                 );
-                console.error("Expect trouble");
-                continue;
+                console.error("No packages updated.");
+                fs.unlinkSync("storage/pully/pulling");
+                return;
             }
 
             let bytes = res.bytes();
@@ -102,21 +106,26 @@ function pullSync(packages, log) {
             );
 
             if (packagePath === undefined) {
-                console.error(`Failed to locate package.json for ${name}`);
-                console.error(`Failed to install ${name}, expect troubles.`);
-                continue;
+                console.error(`Failed to locate package.json for ${name}.`);
+                console.error(`No packages updated.`);
+                fs.unlinkSync("storage/pully/pulling");
+                return;
             }
 
-            if (fs.existsSync(`modules/${name}`)) {
-                fs.unlinkSync(`modules/${name}`);
-            }
-            fs.renameSync(packagePath, `modules/${name}`);
+            renames.push([packagePath, `modules/${name}`]);
             explicits[name] ||= explicitPulls[name] == true;
             installedCount++;
         } catch (error) {
             console.error(`Failed to install ${name}, expect troubles.`);
             console.error(error);
         }
+    }
+
+    for (let [old, to] of renames) {
+        if (fs.existsSync(to)) {
+            fs.unlinkSync(to);
+        }
+        fs.renameSync(old, to);
     }
 
     if (log)

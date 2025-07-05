@@ -1,10 +1,9 @@
 let { getLocalManifestsSync } = module.require("../local");
 let fs = require("fs");
 
-function getOrphansSync() {
+function getOrphansSync(explicits) {
     let manifests = getLocalManifestsSync();
 
-    let explicits = require("/storage/pully/explicits.json");
     let queue = [];
 
     let isOrphan = {};
@@ -14,19 +13,19 @@ function getOrphansSync() {
             fs.existsSync(`modules/${name}/.git`)
         ) {
             // user pakcage
-            queue.push(name);
+            queue.push([name, [name]]);
         }
         isOrphan[name] = true;
     }
 
     for (let [name, isExplicit] of Object.entries(explicits)) {
-        if (isExplicit && !queue.includes(name)) queue.push(name);
+        if (isExplicit) queue.push([name, [name]]);
     }
 
     let requiredBys = {};
 
     while (queue.length != 0) {
-        let name = queue.shift();
+        let [name, reqStack] = queue.shift();
         if (!isOrphan[name]) continue;
 
         isOrphan[name] = false;
@@ -34,8 +33,9 @@ function getOrphansSync() {
         let manifest = manifests[name];
         for (let dep in manifest.dependencies) {
             requiredBys[dep] ??= [];
-            requiredBys[dep].push(name);
-            if (!queue.includes(dep)) queue.push(dep);
+            requiredBys[dep].push(reqStack[0]);
+            if (!queue.includes(dep))
+                queue.push([dep, reqStack.concat([name])]);
         }
     }
 

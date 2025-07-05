@@ -32,7 +32,7 @@ function buildInstallCommand(currentDepth = 1) {
     }
 
     let command = {
-        // suggests: getRemotePackageList,
+        suggests: getRemotePackageList,
         type: StringArgumentType.word(),
         execute: (ctx) => install(ctx, currentDepth - 1),
     };
