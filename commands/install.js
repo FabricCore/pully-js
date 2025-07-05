@@ -21,8 +21,8 @@ function install(ctx, numberOfArguments) {
 
 let maxDepth = 256;
 
-function buildInstallCommand(currentDepth = 0) {
-    if (currentDepth == 0) {
+function buildInstallCommand(currentDepth = 1) {
+    if (currentDepth == 1) {
         return {
             execute: (ctx) => install(ctx, 0),
             args: {
@@ -32,16 +32,15 @@ function buildInstallCommand(currentDepth = 0) {
     }
 
     let command = {
-        suggests: getRemotePackageList,
+        // suggests: getRemotePackageList,
         type: StringArgumentType.word(),
-        execute: (ctx) => install(ctx, currentDepth),
+        execute: (ctx) => install(ctx, currentDepth - 1),
     };
 
     if (currentDepth <= maxDepth) {
         command.args = {};
-        command.args[`package${currentDepth}`] = buildInstallCommand(
-            currentDepth + 1,
-        );
+        command.args[`package${currentDepth}`] =
+            buildInstallCommand(currentDepth + 1);
     }
 
     return command;

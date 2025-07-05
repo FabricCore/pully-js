@@ -22,8 +22,8 @@ function uninstall(ctx, numberOfArguments) {
 
 let maxDepth = 256;
 
-function buildUninstallCommand(currentDepth = 0) {
-    if (currentDepth == 0) {
+function buildUninstallCommand(currentDepth = 1) {
+    if (currentDepth == 1) {
         return {
             execute: (ctx) => uninstall(ctx, 0),
             args: {
@@ -33,9 +33,9 @@ function buildUninstallCommand(currentDepth = 0) {
     }
 
     let command = {
-        suggests: getLocalPackageList,
+        // suggests: getLocalPackageList,
         type: StringArgumentType.word(),
-        execute: (ctx) => uninstall(ctx, currentDepth),
+        execute: (ctx) => uninstall(ctx, currentDepth - 1),
     };
 
     if (currentDepth <= maxDepth) {
