@@ -1,4 +1,6 @@
-const { getLocalPackageList } = require("./suggestions");
+let { StringArgumentType } = com.mojang.brigadier.arguments;
+
+let { getLocalPackageList } = require("./suggestions");
 
 let { remove } = module.require("../", "lazy");
 
