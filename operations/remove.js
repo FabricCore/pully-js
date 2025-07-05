@@ -2,9 +2,25 @@ let { getOrphansSync } = module.require("../resolve");
 let fs = require("fs");
 
 function removeSync(packages, log) {
-    let explicits = require("/storage/pully/explicits.json");
+    if (log) console.info("Resolving dependencies...");
+
+    let explicits;
+    if (fs.existsSync("storage/pully/explicits.json")) {
+        explicits = require("/storage/pully/explicits.json");
+    } else {
+        explicits = {};
+    }
 
     for (let name of packages) {
+        if (name == "pully") {
+            console.error("Pully cannot uninstall itself.");
+            console.error(
+                "Manual installation of packages can lead to inconsistencies.",
+            );
+            console.error("No packages removed.");
+            return;
+        }
+
         if (explicits[name] == undefined && fs.existsSync(`modules/${name}`)) {
             console.error(
                 `${name} is not installed with pully, please remove it first`,
@@ -53,7 +69,15 @@ function removeSync(packages, log) {
         delete explicits[name];
     }
 
-    if (log) console.info(`Removed ${removeCount} packages.`);
+    if (log) {
+        if (removeCount == 0) {
+            console.warn("No packages removed.");
+        } else {
+            console.info(
+                `Removed ${removeCount} package${removeCount > 1 ? "s" : ""}.`,
+            );
+        }
+    }
 
     if (removeCount != 0) {
         fs.writeFileSync(

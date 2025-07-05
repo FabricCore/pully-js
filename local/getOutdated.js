@@ -5,9 +5,6 @@ function getOutdatedSync(index, localManifests) {
         let localVersion = manifest.version;
 
         if (index[manifest.name] == undefined) {
-            console.warn(
-                `Package ${manifest.name} does not exist at remote, it will not be updated.`,
-            );
             continue;
         }
 
@@ -35,9 +32,6 @@ function getUpToDateSync(index, localManifests) {
         let localVersion = manifest.version;
 
         if (index[manifest.name] == undefined) {
-            console.warn(
-                `Package ${manifest.name} does not exist at remote, it will not be updated.`,
-            );
             continue;
         }
 

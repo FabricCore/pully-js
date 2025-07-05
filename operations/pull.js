@@ -34,6 +34,14 @@ function pullSync(packages, log) {
     let remoteIndex = pully.indexSync();
     let localManifests = pully.getLocalManifestsSync();
 
+    for (let manifest of Object.values(localManifests)) {
+        if (remoteIndex[manifest.name] == undefined) {
+            console.warn(
+                `Package ${manifest.name} does not exist at remote, it will not be updated.`,
+            );
+        }
+    }
+
     let manifestsToPull = packages.map((package) =>
         pully.manifestSync(package),
     );
@@ -128,10 +136,15 @@ function pullSync(packages, log) {
         fs.renameSync(old, to);
     }
 
-    if (log)
-        console.info(
-            `${installedCount} package${installedCount > 1 ? "s" : ""} installed.`,
-        );
+    if (log) {
+        if (installedCount == 0) {
+            console.warn("No packages updated.");
+        } else {
+            console.info(
+                `Pulled ${installedCount} package${removeCount > 1 ? "s" : ""}.`,
+            );
+        }
+    }
 
     fs.writeFileSync(
         "storage/pully/explicits.json",
