@@ -1,6 +1,8 @@
 let { StringArgumentType } = com.mojang.brigadier.arguments;
 let { pull } = module.require("../", "lazy");
 
+let { getRemotePackageList } = module.require("./suggestions");
+
 function install(ctx, numberOfArguments) {
     let packages = [];
 
@@ -17,7 +19,7 @@ function install(ctx, numberOfArguments) {
     return 0;
 }
 
-let maxDepth = 256;
+let maxDepth = 5;
 
 function buildInstallCommand(currentDepth = 0) {
     if (currentDepth == 0) {
@@ -29,6 +31,7 @@ function buildInstallCommand(currentDepth = 0) {
     }
 
     let command = {
+        suggests: getRemotePackageList,
         type: StringArgumentType.word(),
         execute: (ctx) => install(ctx, currentDepth),
     };

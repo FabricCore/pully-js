@@ -8,18 +8,56 @@ let pully = module.require("../", "lazy");
 function pullSync(packages, log) {
     if (log) console.info("Resolving dependencies...");
 
+    let explicits;
+    if (fs.existsSync("storage/pully/explicits.json")) {
+        explicits = require("/storage/pully/explicits.json");
+    } else {
+        explicits = {};
+    }
+
+    let explicitPulls = {};
+    packages = packages.filter((name) => {
+        if (explicits[name] == undefined && fs.existsSync(`modules/${name}`)) {
+            console.warn(
+                `${name} is not installed with pully, please remove package before updating it.`,
+            );
+            return false;
+        }
+
+        explicitPulls[name] = true;
+        if (explicits[name] == false) {
+            explicits[name] = true;
+        }
+
+        return true;
+    });
+
     let remoteIndex = pully.indexSync();
     let localManifests = pully.getLocalManifestsSync();
 
     let manifestsToPull = packages.map((package) =>
         pully.manifestSync(package),
     );
-    let upToDate = new Set(pully.getUpToDateSync(remoteIndex, localManifests));
+    let upToDate = pully.getUpToDateSync(remoteIndex, localManifests);
 
     let manifestsOfPackagesToPull = pully.dependenciesSync(
         manifestsToPull,
         upToDate,
     );
+
+    for (let name of Object.keys(manifestsToPull)) {
+        if (explicits[name] == undefined && fs.existsSync(`modules/${name}`)) {
+            console.warn(
+                `${name} is not installed with pully, please remove package before updating it.`,
+            );
+            delete manifestsToPull[name];
+        } else if(fs.existsSync(`modules/${name}/.git`)) {
+            console.warn(
+                `${name} is a Git repository, it will not be updated for protection.`,
+            );
+            delete manifestsToPull[name];
+        }
+    }
 
     let urls = Object.values(manifestsOfPackagesToPull).map((manifest) => [
         manifest.name,
@@ -61,7 +99,11 @@ function pullSync(packages, log) {
                 continue;
             }
 
+            if (fs.existsSync(`modules/${name}`)) {
+                fs.unlinkSync(`modules/${name}`);
+            }
             fs.renameSync(packagePath, `modules/${name}`);
+            explicits[name] ||= explicitPulls[name] == true;
             installedCount++;
         } catch (error) {
             console.error(`Failed to install ${name}, expect troubles.`);
@@ -74,6 +116,10 @@ function pullSync(packages, log) {
             `${installedCount} package${installedCount > 1 ? "s" : ""} installed.`,
         );
 
+    fs.writeFileSync(
+        "storage/pully/explicits.json",
+        JSON.stringify(explicits, null, 2),
+    );
     fs.unlinkSync("storage/pully/pulling");
 }
 

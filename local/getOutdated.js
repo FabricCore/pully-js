@@ -44,8 +44,8 @@ function getUpToDateSync(index, localManifests) {
         let remoteVersion = index[manifest.name].version;
 
         if (
-            localVersion.split(".").map(parseInt) >=
-            remoteVersion.split(".").map(parseInt)
+            localVersion.split(".").map((n) => parseInt(n)) >=
+            remoteVersion.split(".").map((n) => parseInt(n))
         ) {
             out.push(manifest.name);
         }

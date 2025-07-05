@@ -1,8 +1,14 @@
 let { manifestSync } = module.require("../getters");
 
 function dependenciesSync(manifests, upToDate, manifestCache = {}) {
+    let upToDateSet = {};
+
+    for (let name of upToDate) {
+        upToDateSet[name] = true;
+    }
+
     for (let manifest of manifests) {
-        if (upToDate.has(manifest.name)) {
+        if (upToDateSet[manifest.name]) {
             continue;
         }
 
