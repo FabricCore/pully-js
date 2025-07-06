@@ -47,10 +47,7 @@ function pullSync(packages, log) {
     );
     let upToDate = pully.getUpToDateSync(remoteIndex, localManifests);
 
-    let manifestsOfPackagesToPull = pully.dependenciesSync(
-        manifestsToPull,
-        upToDate,
-    );
+    let manifestsOfPackagesToPull = {};
 
     Object.assign(
         manifestsOfPackagesToPull,
@@ -58,6 +55,22 @@ function pullSync(packages, log) {
             pully.getOutdatedSync(remoteIndex, localManifests),
             remoteIndex,
         ),
+    );
+
+    let missing = pully.missingSync(localManifests, remoteIndex);
+    if (Array.isArray(missing)) {
+        console.error(
+            `These required modules could not be found on repository: ${missing.join(", ")}.`,
+        );
+        console.error("No packages updated.");
+        return;
+    }
+
+    Object.assign(manifestsOfPackagesToPull, missing);
+
+    Object.assign(
+        manifestsOfPackagesToPull,
+        pully.dependenciesSync(manifestsToPull, upToDate),
     );
 
     for (let name of Object.keys(manifestsOfPackagesToPull)) {
