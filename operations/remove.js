@@ -1,8 +1,10 @@
 let { getOrphansSync } = module.require("../resolve");
 let fs = require("fs");
+let pully = module.require("../", "lazy");
 
 function removeSync(packages, log) {
     if (log) console.info("Resolving dependencies...");
+    let localManifests = pully.getLocalManifestsSync();
 
     let explicits;
     if (fs.existsSync("storage/pully/explicits.json")) {
@@ -32,7 +34,7 @@ function removeSync(packages, log) {
         explicits[name] = false;
     }
 
-    let orphans = getOrphansSync(explicits);
+    let orphans = getOrphansSync(explicits, localManifests);
 
     for (let name of packages) {
         if ((orphans[name] ?? []).length != 0) {
@@ -44,7 +46,7 @@ function removeSync(packages, log) {
         }
     }
 
-    let removeCount = 0;
+    let removedPackages = [];
 
     for (let [name, deps] of Object.entries(orphans)) {
         if (deps.length != 0) continue;
@@ -64,22 +66,39 @@ function removeSync(packages, log) {
         }
 
         if (log) console.info(`Removing ${name}`);
-        removeCount++;
+        removedPackages.push(name);
         fs.unlinkSync(`modules/${name}`);
         delete explicits[name];
     }
 
-    if (log) {
-        if (removeCount == 0) {
-            console.warn("No packages removed.");
-        } else {
-            console.info(
-                `Removed ${removeCount} package${removeCount > 1 ? "s" : ""}.`,
+    let removedManifests = {};
+    for (let removed of removedPackages) {
+        removedManifests[removed] = localManifests[removed];
+    }
+
+    let order = pully.orderSync(removedManifests);
+
+    for (let toUnload of order.reverse()) {
+        try {
+            pully.unloadSync(toUnload);
+        } catch (e) {
+            console.warn(
+                `An error occured when running stop for ${toUnload}. Cause: ${e}`,
             );
         }
     }
 
-    if (removeCount != 0) {
+    if (log) {
+        if (removedPackages.length == 0) {
+            console.warn("No packages removed.");
+        } else {
+            console.info(
+                `Removed ${removedPackages.length} package${removedPackages.length > 1 ? "s" : ""}.`,
+            );
+        }
+    }
+
+    if (removedPackages.length != 0) {
         fs.writeFileSync(
             "storage/pully/explicits.json",
             JSON.stringify(explicits, null, 2),

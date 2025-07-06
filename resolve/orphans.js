@@ -1,9 +1,7 @@
 let { getLocalManifestsSync } = module.require("../local");
 let fs = require("fs");
 
-function getOrphansSync(explicits) {
-    let manifests = getLocalManifestsSync();
-
+function getOrphansSync(explicits, manifests) {
     let queue = [];
 
     let isOrphan = {};

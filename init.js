@@ -1,5 +1,7 @@
 let command = require("command");
 
+let getters = module.require("./getters");
+
 let { buildInstallCommand, buildUninstallCommand } =
     module.require("./commands");
 
@@ -11,3 +13,5 @@ command.register({
         uninstall: buildUninstallCommand(),
     },
 });
+
+getters.index();

@@ -60,7 +60,7 @@ function pullSync(packages, log) {
         ),
     );
 
-    for (let name of Object.keys(manifestsToPull)) {
+    for (let name of Object.keys(manifestsOfPackagesToPull)) {
         if (explicits[name] == undefined && fs.existsSync(`modules/${name}`)) {
             console.error(
                 `${name} is not installed with pully, please remove package before updating it.`,
@@ -136,12 +136,33 @@ function pullSync(packages, log) {
         fs.renameSync(old, to);
     }
 
+    let order = pully.orderSync(manifestsOfPackagesToPull);
+
+    for (let toLoad of order) {
+        try {
+            if (localManifests[toLoad]) {
+                try {
+                    pully.unloadSync(toLoad);
+                } catch (e) {
+                    console.warn(
+                        `An error occured when running stop for ${toLoad}. Cause: ${e}`,
+                    );
+                }
+            }
+            pully.loadSync(toLoad);
+        } catch (e) {
+            console.warn(
+                `An error occured when running init for ${toLoad}. Cause: ${e}`,
+            );
+        }
+    }
+
     if (log) {
         if (installedCount == 0) {
             console.warn("No packages updated.");
         } else {
             console.info(
-                `Pulled ${installedCount} package${removeCount > 1 ? "s" : ""}.`,
+                `Pulled ${installedCount} package${installedCount > 1 ? "s" : ""}.`,
             );
         }
     }
