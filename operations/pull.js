@@ -151,6 +151,8 @@ function pullSync(packages, log) {
 
     let order = pully.orderSync(manifestsOfPackagesToPull);
 
+    pully.buildDepsSync();
+
     for (let toLoad of order) {
         try {
             if (localManifests[toLoad]) {

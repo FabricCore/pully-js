@@ -88,6 +88,8 @@ function removeSync(packages, log) {
         }
     }
 
+    pully.buildDepsSync();
+
     if (log) {
         if (removedPackages.length == 0) {
             console.warn("No packages removed.");

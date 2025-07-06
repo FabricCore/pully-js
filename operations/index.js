@@ -3,3 +3,4 @@ module.exports = {};
 Object.assign(module.exports, module.require("./pull"));
 Object.assign(module.exports, module.require("./remove"));
 Object.assign(module.exports, module.require("./load"));
+Object.assign(module.exports, module.require("./buildDeps"));
