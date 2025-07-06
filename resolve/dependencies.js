@@ -1,6 +1,11 @@
 let { manifestSync } = module.require("../getters");
 
-function dependenciesSync(manifests, upToDate, manifestCache = {}) {
+function dependenciesSync(
+    manifests,
+    upToDate,
+    remoteIndex,
+    manifestCache = {},
+) {
     let upToDateSet = {};
 
     for (let name of upToDate) {
@@ -23,15 +28,22 @@ function dependenciesSync(manifests, upToDate, manifestCache = {}) {
                 continue;
             }
 
-            dependenciesSync([manifestSync(dep)], upToDate, manifestCache);
+            manifestCache = dependenciesSync(
+                [manifestSync(dep, remoteIndex)],
+                upToDate,
+                remoteIndex,
+                manifestCache,
+            );
         }
     }
 
     return manifestCache;
 }
 
-function dependencies(manifest, upToDate, manifestCache = {}) {
-    return Promise(() => dependenciesSync(manifest, upToDate, manifestCache));
+function dependencies(manifest, upToDate, remoteIndex, manifestCache = {}) {
+    return Promise(() =>
+        dependenciesSync(manifest, upToDate, remoteIndex, manifestCache),
+    );
 }
 
 module.exports = {

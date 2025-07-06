@@ -25,7 +25,7 @@ function removeSync(packages, log) {
 
         if (explicits[name] == undefined && fs.existsSync(`modules/${name}`)) {
             console.error(
-                `${name} is not installed with pully, please remove it first`,
+                `${name} is not installed with pully, please remove it manually.`,
             );
             console.error("No packages removed.");
             return;
@@ -53,13 +53,13 @@ function removeSync(packages, log) {
 
         if (explicits[name] == undefined && fs.existsSync(`modules/${name}`)) {
             console.error(
-                `${name} is not installed with pully, please remove it first`,
+                `${name} is not installed with pully, please remove it manually.`,
             );
             console.error("No packages removed.");
             return;
         } else if (fs.existsSync(`modules/${name}/.git`)) {
             console.error(
-                `${name} is a Git repository, please remove it first.`,
+                `${name} is a Git repository, please remove it manually.`,
             );
             console.error("No packages removed.");
             return;

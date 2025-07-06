@@ -1,4 +1,3 @@
-let { repo } = require("../config.json");
 let { fetchSync } = require("fetch");
 let fs = require("fs");
 let { extractSync } = require("extract-zip");
@@ -6,6 +5,7 @@ let { extractSync } = require("extract-zip");
 let pully = module.require("../", "lazy");
 
 function pullSync(packages, log) {
+    let { repos } = pully.getConfigSync();
     if (log) console.info("Resolving dependencies...");
 
     let explicits;
@@ -43,7 +43,7 @@ function pullSync(packages, log) {
     }
 
     let manifestsToPull = packages.map((package) =>
-        pully.manifestSync(package),
+        pully.manifestSync(package, remoteIndex),
     );
     let upToDate = pully.getUpToDateSync(remoteIndex, localManifests);
 
@@ -70,7 +70,7 @@ function pullSync(packages, log) {
 
     Object.assign(
         manifestsOfPackagesToPull,
-        pully.dependenciesSync(manifestsToPull, upToDate),
+        pully.dependenciesSync(manifestsToPull, upToDate, remoteIndex),
     );
 
     for (let name of Object.keys(manifestsOfPackagesToPull)) {
@@ -91,7 +91,7 @@ function pullSync(packages, log) {
 
     let urls = Object.values(manifestsOfPackagesToPull).map((manifest) => [
         manifest.name,
-        `${repo}/packages/${manifest.name}/releases/${manifest.version}.zip`,
+        `${repos[remoteIndex[manifest.name].source]}/packages/${manifest.name}/releases/${manifest.version}.zip`,
     ]);
 
     if (fs.existsSync("storage/pully/pulling")) {
@@ -151,7 +151,7 @@ function pullSync(packages, log) {
 
     let order = pully.orderSync(manifestsOfPackagesToPull);
 
-    pully.buildDepsSync();
+    // pully.buildDepsSync();
 
     for (let toLoad of order) {
         try {

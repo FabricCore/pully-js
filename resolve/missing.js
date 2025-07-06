@@ -22,7 +22,7 @@ function missingSync(localManifests, index) {
     }
 
     for (let name of Object.keys(missed)) {
-        missed[name] = getters.manifestSync(name, index[name].version);
+        missed[name] = getters.manifestSync(name, index, index[name].version);
     }
 
     return missed;

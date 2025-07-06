@@ -1,7 +1,10 @@
 let { fetchSync } = require("fetch")
-let { repo } = require("../config.json");
+let { getConfigSync } = module.require("../local");
 
-function versionSync(package) {
+function versionSync(package, remoteIndex) {
+    let { repos } = getConfigSync();
+    let repo = repos[remoteIndex[package].source];
+    
     let res = fetchSync(`${repo}/packages/${package}/versions.json`);
 
     if(!res.ok()) {
@@ -11,8 +14,8 @@ function versionSync(package) {
     return res.json();
 }
 
-function version(package) {
-    return Promise(() => versionSync(package, version));
+function version(package, remoteIndex) {
+    return Promise(() => versionSync(package, remoteIndex));
 }
 
 module.exports = {
