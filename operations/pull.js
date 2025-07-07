@@ -66,7 +66,8 @@ function pullSync(packages, log) {
         return;
     }
 
-    Object.assign(manifestsOfPackagesToPull, missing);
+    manifestsToPull = manifestsToPull.concat(Object.values(missing));
+    // Object.assign(manifestsOfPackagesToPull, missing);
 
     Object.assign(
         manifestsOfPackagesToPull,
