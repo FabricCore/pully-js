@@ -27,7 +27,7 @@ function buildDepsSync() {
             registeredModules[name] = manifestJSON;
         } catch (error) {
             console.warn(
-                `Could not read package.json for ${name}, not loaded. Cause: ${error}`,
+                `Could not read package.json for ${name}, build incomplete. Cause: ${error}`,
             );
             continue;
         }
@@ -85,7 +85,7 @@ function buildDepsSync() {
 
         if (toBeLoaded.length === 0) {
             console.error(
-                `The following modules are not loaded: ${Object.keys(registeredModules).join(", ")}, either because there is a cycle in dependency, or a dependency module has failed to load`,
+                `The following modules are not loaded correctly: ${Object.keys(registeredModules).join(", ")}, either because there is a cycle in dependency, or a dependency module has failed to load`,
             );
             break;
         }

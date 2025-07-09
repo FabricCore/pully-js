@@ -106,6 +106,8 @@ function removeSync(packages, log) {
             JSON.stringify(explicits, null, 2),
         );
     }
+
+    pully.buildDepsSync();
 }
 
 function remove(packages, log) {
