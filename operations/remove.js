@@ -67,7 +67,6 @@ function removeSync(packages, log) {
 
         if (log) console.info(`Removing ${name}`);
         removedPackages.push(name);
-        fs.unlinkSync(`modules/${name}`);
         delete explicits[name];
     }
 
@@ -88,7 +87,9 @@ function removeSync(packages, log) {
         }
     }
 
-    pully.buildDepsSync();
+    for (let name of Object.keys(orphans)) {
+        fs.unlinkSync(`modules/${name}`);
+    }
 
     if (log) {
         if (removedPackages.length == 0) {

@@ -150,6 +150,8 @@ function pullSync(packages, log) {
         fs.renameSync(old, to);
     }
 
+    pully.buildDepsSync();
+
     let order = pully.orderSync(manifestsOfPackagesToPull);
 
     for (let toLoad of order) {
@@ -186,8 +188,6 @@ function pullSync(packages, log) {
         JSON.stringify(explicits, null, 2),
     );
     fs.unlinkSync("storage/pully/pulling");
-
-    pully.buildDepsSync();
 }
 
 function pull(packages, log) {
