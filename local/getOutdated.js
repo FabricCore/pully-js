@@ -1,19 +1,31 @@
+function isOutdated(currentVersion, newVersion) {
+    for (
+        let i = 0;
+        i < Math.min(currentVersion.length, newVersion.length);
+        i++
+    ) {
+        if (currentVersion[i] > newVersion[i]) return false;
+        if (currentVersion[i] < newVersion[i]) return true;
+    }
+
+    return currentVersion.length < newVersion.length;
+}
+
 function getOutdatedSync(index, localManifests) {
     let out = [];
 
     for (let manifest of Object.values(localManifests)) {
-        let localVersion = manifest.version;
+        let localVersion = manifest.version.split(".").map((n) => parseInt(n));
 
         if (index[manifest.name] == undefined) {
             continue;
         }
 
-        let remoteVersion = index[manifest.name].version;
+        let remoteVersion = index[manifest.name].version
+            .split(".")
+            .map((n) => parseInt(n));
 
-        if (
-            localVersion.split(".").map((n) => parseInt(n)) <
-            remoteVersion.split(".").map((n) => parseInt(n))
-        ) {
+        if (isOutdated(localVersion, remoteVersion)) {
             out.push(manifest.name);
         }
     }
@@ -29,18 +41,17 @@ function getUpToDateSync(index, localManifests) {
     let out = [];
 
     for (let manifest of Object.values(localManifests)) {
-        let localVersion = manifest.version;
+        let localVersion = manifest.version.split(".").map((n) => parseInt(n));
 
         if (index[manifest.name] == undefined) {
             continue;
         }
 
-        let remoteVersion = index[manifest.name].version;
+        let remoteVersion = index[manifest.name].version
+            .split(".")
+            .map((n) => parseInt(n));
 
-        if (
-            localVersion.split(".").map((n) => parseInt(n)) >=
-            remoteVersion.split(".").map((n) => parseInt(n))
-        ) {
+        if (!isOutdated(localVersion, remoteVersion)) {
             out.push(manifest.name);
         }
     }
