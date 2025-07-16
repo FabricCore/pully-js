@@ -87,7 +87,7 @@ function removeSync(packages, log) {
         }
     }
 
-    for (let name of Object.keys(orphans)) {
+    for (let name of removedPackages) {
         fs.unlinkSync(`modules/${name}`);
     }
 
