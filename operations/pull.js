@@ -19,7 +19,7 @@ function pullSync(packages, log) {
     for (let name of packages) {
         if (explicits[name] == undefined && fs.existsSync(`modules/${name}`)) {
             console.error(
-                `${name} is not installed with pully, please remove package first.`,
+                `${name} is not installed with pully, update package manually.`,
             );
             console.error("No packages updated.");
             return;
@@ -77,7 +77,7 @@ function pullSync(packages, log) {
     for (let name of Object.keys(manifestsOfPackagesToPull)) {
         if (explicits[name] == undefined && fs.existsSync(`modules/${name}`)) {
             console.error(
-                `${name} is not installed with pully, please remove package before updating it.`,
+                `${name} is not installed with pully, update package manually.`,
             );
             console.error("No packages updated.");
             return;
