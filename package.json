@@ -18,6 +18,7 @@
     "dependencies": {
         "rinode": "0.1.0",
         "extract-zip": "0.1.0",
-        "command": "0.1.0"
+        "command": "0.1.0",
+        "listener": "0.1.0"
     }
 }

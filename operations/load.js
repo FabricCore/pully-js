@@ -1,4 +1,8 @@
 let fs = require("fs");
+let listener = require("listener");
+
+listener.createChannel("BeforePullyModuleUnload");
+
 let { Runtime } = Packages.ws.siri.jscore.runtime;
 
 function loadSync(name) {
@@ -11,6 +15,7 @@ function loadSync(name) {
 }
 
 function unloadSync(name) {
+    listener.dispatchCustomEvent("BeforePullyModuleUnload", [name]);
     if (
         fs.existsSync(`modules/${name}/stop.js`) ||
         fs.existsSync(`modules/${name}/stop/index.js`)
