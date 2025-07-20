@@ -152,19 +152,28 @@ function pullSync(packages, log) {
 
     pully.buildDepsSync();
 
+    for (let [name, deps] of Object.entries(module.globals.loadDependencies)) {
+        if (deps.every((dep) => manifestsOfPackagesToPull[dep] == undefined))
+            continue;
+
+        manifestsOfPackagesToPull[name] = localManifests[name];
+    }
+
     let order = pully.orderSync(manifestsOfPackagesToPull);
 
+    for (let i = order.length - 1; i >= 0; i--) {
+        if (localManifests[order[i]]) {
+            try {
+                pully.unloadSync(order[i]);
+            } catch (e) {
+                console.warn(
+                    `An error occured when running stop for ${order[i]}. Cause: ${e}`,
+                );
+            }
+        }
+    }
     for (let toLoad of order) {
         try {
-            if (localManifests[toLoad]) {
-                try {
-                    pully.unloadSync(toLoad);
-                } catch (e) {
-                    console.warn(
-                        `An error occured when running stop for ${toLoad}. Cause: ${e}`,
-                    );
-                }
-            }
             pully.loadSync(toLoad);
         } catch (e) {
             console.warn(

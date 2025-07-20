@@ -1,4 +1,5 @@
 let fs = require("fs");
+let { Runtime } = Packages.ws.siri.jscore.runtime;
 
 function loadSync(name) {
     if (
@@ -15,6 +16,12 @@ function unloadSync(name) {
         fs.existsSync(`modules/${name}/stop/index.js`)
     ) {
         module.require(`/modules/${name}/stop`);
+    }
+
+    for (let entry of Array.from(Runtime.listLoaded())) {
+        if (entry[0] == "modules" && entry[1] == name) {
+            Runtime.unload(entry);
+        }
     }
 }
 
