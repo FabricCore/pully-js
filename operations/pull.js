@@ -49,11 +49,12 @@ function pullSync(packages, log) {
 
     let manifestsOfPackagesToPull = {};
 
-    Object.assign(
-        manifestsOfPackagesToPull,
-        pully.packageManifestsSync(
-            pully.getOutdatedSync(remoteIndex, localManifests),
-            remoteIndex,
+    manifestsToPull = manifestsToPull.concat(
+        Object.values(
+            pully.packageManifestsSync(
+                pully.getOutdatedSync(remoteIndex, localManifests),
+                remoteIndex,
+            ),
         ),
     );
 
@@ -152,27 +153,23 @@ function pullSync(packages, log) {
 
     pully.buildDepsSync();
 
-    for (let [name, deps] of Object.entries(module.globals.loadDependencies)) {
-        if (deps.every((dep) => manifestsOfPackagesToPull[dep] == undefined))
-            continue;
+    let unloadOrder = pully.orderSync(localManifests);
 
-        manifestsOfPackagesToPull[name] = localManifests[name];
-    }
-
-    let order = pully.orderSync(manifestsOfPackagesToPull);
-
-    for (let i = order.length - 1; i >= 0; i--) {
-        if (localManifests[order[i]]) {
+    for (let i = unloadOrder.length - 1; i >= 0; i--) {
+        if (localManifests[unloadOrder[i]]) {
             try {
-                pully.unloadSync(order[i]);
+                pully.unloadSync(unloadOrder[i]);
             } catch (e) {
                 console.warn(
-                    `An error occured when running stop for ${order[i]}. Cause: ${e}`,
+                    `An error occured when running stop for ${unloadOrder[i]}. Cause: ${e}`,
                 );
             }
         }
     }
-    for (let toLoad of order) {
+
+    let loadOrder = pully.orderSync(manifestsOfPackagesToPull);
+
+    for (let toLoad of loadOrder) {
         try {
             pully.loadSync(toLoad);
         } catch (e) {
